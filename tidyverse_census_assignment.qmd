@@ -159,10 +159,22 @@ Join the ZCTA dataframe to the zip totals dataframe and calculate a per capita r
 
 
 ```{r}
+pa_zips <- read_csv("data/pa_zip_totals.csv")
+
+pa_zips <- pa_zips %>%
+  mutate(GEOID = zip)
+
+variables <- c(med_income = "B19013_001",
+               total_pop = "B01003_001")
 
 
+data_vars <- get_acs(geography = "county",
+        variables = variables,
+        state = "PA",
+        output = "wide"
+        )
 
-
+inner_join(pa_zips, data_vars, by = "GEOID")
 
 
 

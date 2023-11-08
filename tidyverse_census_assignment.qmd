@@ -87,7 +87,6 @@ data_q1 %>%
   filter(B01002_001E >= 50)
 
 
-
 ```
 
 
@@ -119,10 +118,8 @@ p2 <- get_acs(geography = "county",
         )
 
 
-
 q3 <- left_join(p2, p1, by = "NAME", "GEOID") %>%
   select(-ends_with("M"))
-
 
 
 q3 <- q3 %>%   
@@ -142,20 +139,22 @@ q3 <- q3 %>%
 Join the ZCTA dataframe to the zip totals dataframe and calculate a per capita rate for mail ballots per 100 population in each ZCTA, and write code to answer the following questions?
 
 -   Which zip code *that has returned at least 100 mail ballots* has the highest per capita rate?
-
+#The zip code 19136 has the highest mail in ballot return rate per capita at about 26%.
 
 
 -   Where is that zip code and what does Census Reporter say about its demographics?
+#It's in a county kind of in the middle of the state -- the average age is 78.6, the median household income is about $71,00 and 64% of them are women. This seems like an established, middle class suburb which we know relies on mail in ballots at a high rate. 
 
 
 -   For zip codes with a per capita rate of at least 10 returned ballots per 100 people, how many have median incomes of at least \$100,000?
+# Four counties have at least 10 returned ballots per 100 people with at least $100,000 in median income  
 
 
 -   How many have median incomes less than the state figure of \$68,957?
-
+# 17 zip codes have median incomes less than the state figure 
 
 -   What's the most interesting one from this last result?
-
+# I find 15625 very interesting. It has a high median income but it is such a small town, but about 15% of the people vote via mail. It's rural but they make a lot of money. There's a lot going on, a rural town that votes by mail. 
 
 
 ```{r}
@@ -168,15 +167,21 @@ variables <- c(med_income = "B19013_001",
                total_pop = "B01003_001")
 
 
-data_vars <- get_acs(geography = "county",
-        variables = variables,
-        state = "PA",
+data_vars <- get_acs(geography = 'zip code tabulation area',
+        variables = c(med_income = 'B19013_001', total_pop = 'B01003_001'),
+        state = 'PA',
+        year = 2019,
         output = "wide"
         )
 
-inner_join(pa_zips, data_vars, by = "GEOID")
+big <- inner_join(pa_zips, data_vars, by = c("zip" = "GEOID"))
+  
+big <- big %>%
+  mutate(per_capita = (count/total_popE) * 100)
 
-
+big %>%
+  filter(count >= 100) %>%
+  arrange(-per_capita)
 
 
 ```
@@ -185,9 +190,13 @@ inner_join(pa_zips, data_vars, by = "GEOID")
 ```{r}
 
 
+big %>%
+  filter(per_capita >= 10) %>%
+  arrange(-med_incomeE)
 
-
-
+big %>%
+  filter(per_capita >= 10) %>%
+  arrange(med_incomeE)
 
 
 
